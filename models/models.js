@@ -32,7 +32,7 @@ const Category = sequalize.define('category', {
 })
 
 const Brand = sequalize.define('brand', {
-    id: { type: Datatypes.INTEGER, primaryKey: true, autoIncrement: true },
+    id: { type: Datatypes.INTEGER,  primaryKey: true, autoIncrement: true },
     name: { type: Datatypes.STRING, unique: true, allowNull: false },
 })
 

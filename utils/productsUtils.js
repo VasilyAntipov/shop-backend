@@ -1,14 +1,23 @@
-const parseFilters = (filters) => {
+const { DEFAULT_LIMIT, DEFAULT_PAGE } = require("../constants");
+
+const parseFilters = (brandId, countryId) => {
+
     let brandIds = [];
     let countryIds = [];
 
-    if (filters.brandId) {
-        brandIds = filters.brandId.split(',');
+    if (brandId) {
+        brandIds = brandId.split(',');
     }
-    if (filters.countryId) {
-        countryIds = filters.countryId.split(',')
+    if (countryId) {
+        countryIds = countryId.split(',')
     }
     return { brandIds, countryIds }
 }
 
-module.exports = parseFilters
+const getOffset = (limit, page) => {
+    limit = limit || DEFAULT_LIMIT
+    page = page || DEFAULT_PAGE
+    return page * limit - limit
+}
+
+module.exports = { parseFilters, getOffset }
