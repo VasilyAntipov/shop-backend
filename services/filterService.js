@@ -1,5 +1,6 @@
 const { Product, Brand, Country } = require("../models/models")
 const { Op, fn, col } = require("sequelize");
+const { orderList, groupList } = require('../constants/index')
 
 class FilterService {
 
@@ -17,8 +18,8 @@ class FilterService {
             group: ['brand.id']
         })
 
-        const findedFilters =
-            [
+        const findedFilters = {
+            filters: [
                 {
                     type: 'brandId',
                     name: 'Производитель',
@@ -28,11 +29,15 @@ class FilterService {
                     type: 'countryId',
                     name: 'Страна производства',
                     data: findedCountries
-                }
-            ]
+                },
+            ],
+            orderList,
+            groupList
 
+        }
         return findedFilters
     }
+
 }
 
 module.exports = new FilterService()

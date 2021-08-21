@@ -2,6 +2,7 @@ const { Product, ProductInfo, Brand, Country } = require("../models/models")
 const { parseFilters, getOffset } = require("../utils/productsUtils")
 const { Op } = require("sequelize");
 const FileService = require("./fileService");
+const { orderList ,groupList} = require('../constants/index')
 
 class ProductService {
 
@@ -18,18 +19,15 @@ class ProductService {
     }
 
     async getAll(filters) {
-        const { categoryId, brandId, countryId, limit, page } = filters
+        let { categoryId, brandId, countryId, limit, page, order, group } = filters
         const offset = getOffset(limit, page)
         const { brandIds, countryIds } = parseFilters(brandId, countryId)
 
-        const findedProducts = await Product.findAndCountAll({
-            where: {
-                [Op.and]: [
-                    { categoryId },
-                    // { brandId: { [Op.or]: brandIds } },
-                    { countryId: { [Op.or]: countryIds } }
-                ]
-            },
+        order = order? [orderList.find(item => item.id === +order).value] : null
+        
+        const parameters =
+        {
+            where: { categoryId },
             include: [
                 {
                     model: Brand,
@@ -42,15 +40,13 @@ class ProductService {
                     attributes: ['name']
                 },
             ],
+            order,
             limit,
-            offset
-        })
+            offset,
+        }
 
-        // const findedBrands = await Brand.findAll({
-        //     attributes: ['name', [fn('COUNT', col('products.id')), 'count']],
-        //     include: [{ model: Product, where: { categoryId }, attributes: [] }],
-        //     group: ['brand.id']
-        // })
+
+        const findedProducts = await Product.findAndCountAll(parameters)
 
         return findedProducts
     }
@@ -66,6 +62,7 @@ class ProductService {
         const createdProductInfo = await ProductInfo.create(productInfo)
         return createdProductInfo
     }
+
 }
 
 module.exports = new ProductService()

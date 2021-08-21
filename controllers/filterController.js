@@ -12,8 +12,8 @@ class FilterController {
         } catch (e) {
             next(ApiError.badRequest(e.message))
         }
-
     }
+
 }
 
 module.exports = new FilterController()

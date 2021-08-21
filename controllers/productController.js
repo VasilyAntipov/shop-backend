@@ -52,7 +52,7 @@ class ProductController {
     }
     async getAll(req, res, next) {
         try {
-            const { brandId, countryId, limit, page } = req.query;
+            const { brandId, countryId, limit, page , order, group} = req.query;
             const { categoryId } = req.params
 
             if (!Number.isInteger(parseInt(categoryId))) {
@@ -61,7 +61,7 @@ class ProductController {
 
 
             const products = await ProductService
-                .getAll({ brandId, countryId, limit, page, categoryId })
+                .getAll({ brandId, countryId, limit, page, categoryId, order, group })
 
             return res.json(products)
         } catch (e) {
