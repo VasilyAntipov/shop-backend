@@ -19,12 +19,11 @@ class ProductService {
     }
 
     async getAll(filters) {
-        let { categoryId, brandId, countryId, limit, page, order, group } = filters
+        let { categoryId, brandId, countryId, limit = 5, page = 1, order, group } = filters
         const offset = getOffset(limit, page)
         const { brandIds, countryIds } = parseFilters(brandId, countryId)
 
-        order = order? [orderList.find(item => item.id === +order).value] : null
-        
+        order = order? [orderList.find(item => item.id === +order).value] : orderList[0].value
         const parameters =
         {
             where: { categoryId },

@@ -5,7 +5,7 @@ const User = sequalize.define('user', {
     id: { type: Datatypes.INTEGER, primaryKey: true, autoIncrement: true },
     email: { type: Datatypes.STRING, unique: true },
     password: { type: Datatypes.STRING },
-    role: { type: Datatypes.STRING, defaultValue: 'User' }
+    role: { type: Datatypes.STRING, defaultValue: 'USER' }
 })
 
 const Basket = sequalize.define('basket', {
