@@ -27,8 +27,9 @@ const Product = sequalize.define('product', {
 const Category = sequalize.define('category', {
     id: { type: Datatypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: Datatypes.STRING, unique: true, allowNull: false },
-    parentId: { type: Datatypes.INTEGER },
+    parentId: { type: Datatypes.INTEGER, allowNull:true},
     img: { type: Datatypes.STRING, allowNull: false },
+    index: {type: Datatypes.FLOAT}
 })
 
 const Brand = sequalize.define('brand', {
