@@ -1,13 +1,13 @@
-const { Category } = require("../models/models")
+const { Category, Product } = require("../models/models")
 const FileService = require("./fileService");
-
+const sequelize = require('sequelize')
 
 class CategoryService {
 
     async create(category) {
 
-        const { img } = category
-        const fileName = FileService.saveFile(img)
+        const { file } = category
+        const fileName = FileService.saveFile(file)
         const createdCategory = await Category.create({ ...category, img: fileName })
         return createdCategory
     }
@@ -21,11 +21,11 @@ class CategoryService {
             const fileName = FileService.saveFile(img)
             updatedCategory.img = fileName
         }
-        if (parentId)
-            updatedCategory.parentId = parentId
+        updatedCategory.parentId = Number(parentId)
         if (index)
-            updatedCategory.index = index
+            updatedCategory.index = Number(index)
         updatedCategory.save()
+        console.log(updatedCategory)
         return updatedCategory
 
     }
@@ -36,9 +36,21 @@ class CategoryService {
     }
 
     async getAll() {
-        const categories = await Category.findAll()
+        const categories = await Category.findAll(
+            {
+                attributes: {
+                    include: [[sequelize.fn('COUNT', sequelize.col('products.id')), "productsCount"]],
+                },
+                include: [{
+                    model: Product,
+                    attributes: []
+                }],
+                group: 'category.id',
+            }
+        )
         return categories
     }
+
 }
 
 module.exports = new CategoryService()

@@ -82,6 +82,8 @@ class ProductController {
             return next(ApiError.badRequest('Непредвиденная ошибка'))
         }
     }
+
+    
 }
 
 module.exports = new ProductController()

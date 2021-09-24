@@ -27,13 +27,13 @@ const Product = sequalize.define('product', {
 const Category = sequalize.define('category', {
     id: { type: Datatypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: Datatypes.STRING, unique: true, allowNull: false },
-    parentId: { type: Datatypes.INTEGER, allowNull:true},
+    parentId: { type: Datatypes.INTEGER,},
     img: { type: Datatypes.STRING, allowNull: false },
-    index: {type: Datatypes.FLOAT}
+    index: { type: Datatypes.FLOAT, }
 })
 
 const Brand = sequalize.define('brand', {
-    id: { type: Datatypes.INTEGER,  primaryKey: true, autoIncrement: true },
+    id: { type: Datatypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: Datatypes.STRING, unique: true, allowNull: false },
 })
 
@@ -71,7 +71,7 @@ ProductInfo.belongsTo(Product)
 Product.hasOne(BasketProduct)
 BasketProduct.belongsTo(Product)
 
-Category.hasMany(Product)
+Category.hasMany(Product, {onDelete: 'NOACTION'})
 Product.belongsTo(Category)
 
 Brand.hasMany(Product)

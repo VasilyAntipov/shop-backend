@@ -6,26 +6,22 @@ const CategoryService = require('../services/categoryService')
 
 
 class CategoryController {
-    // async create(req, res) {
-    //     const { name, parentId } = req.body
-    //     const img = req.files
-    //     console.log(img)
-    //     let fileName = uuid.v4() + '.jpg'
-    //     img.mv(path.resolve(__dirname, '..', 'static', fileName))
-
-    //     const category = await Category.create({ name, parentId, img: fileName })
-    //     return res.json(category)
-    // }
-
     async create(req, res, next) {
         try {
             let { name, parentId, index } = req.body
-            const {img} = req.files
+            if (!Number.isInteger(parseInt(index))) {
+                index = 0
+            }
+            if (!Number.isInteger(parseInt(parentId))) {
+                parentId = 0
+            }
+            const { file } = req.files
             const category = await CategoryService.create(
-                { name, parentId, img, index }
+                { name, parentId, file, index }
             )
             return res.json(category)
         } catch (e) {
+            console.log(e)
             next(ApiError.badRequest(e.message))
         }
 
@@ -36,20 +32,28 @@ class CategoryController {
         try {
             let img = null;
             let { name, parentId, id, index } = req.body
+
             if (req.files) {
                 img = req.files.img
+            }
+            if (!Number.isInteger(parseInt(index))) {
+                index = 0
+            }
+            if (!Number.isInteger(parseInt(parentId))) {
+                parentId = 0
             }
             const category = await CategoryService.update(
                 { name, parentId, id, img, index }
             )
             return res.json(category)
         } catch (e) {
+            // console.log(e)
             next(ApiError.badRequest(e.message))
         }
 
     }
 
-    async getAll(req,res) {
+    async getAll(req, res) {
         const categories = await CategoryService.getAll()
         return res.json(categories)
     }

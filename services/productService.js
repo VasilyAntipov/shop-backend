@@ -62,6 +62,8 @@ class ProductService {
         return createdProductInfo
     }
 
+
+
 }
 
 module.exports = new ProductService()
