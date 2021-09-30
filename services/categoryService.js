@@ -25,7 +25,6 @@ class CategoryService {
         if (index)
             updatedCategory.index = Number(index)
         updatedCategory.save()
-        console.log(updatedCategory)
         return updatedCategory
 
     }

@@ -2,15 +2,34 @@ const { Product, ProductInfo, Brand, Country } = require("../models/models")
 const { parseFilters, getOffset } = require("../utils/productsUtils")
 const { Op } = require("sequelize");
 const FileService = require("./fileService");
-const { orderList ,groupList} = require('../constants/index')
+const { orderList, groupList } = require('../constants/index')
 
 class ProductService {
 
     async create(product) {
-        const { img } = product
-        const fileName = FileService.saveFile(img)
+        const { file } = product
+        const fileName = FileService.saveFile(file)
         const createdProduct = await Product.create({ ...product, img: fileName })
         return createdProduct
+    }
+
+    async update(product) {
+
+        const { id, name, price, categoryId, brandId, countryId, info, file } = product
+        const updatedProduct = await Product.findOne({ where: { id } })
+        updatedProduct.name = name
+        if (file) {
+            const fileName = FileService.saveFile(file)
+            updatedProduct.img = fileName
+        }
+        updatedProduct.categoryId = Number(categoryId)
+        updatedProduct.brandId = Number(brandId)
+        updatedProduct.countryId = Number(countryId)
+        updatedProduct.price = Number(price)
+
+        updatedProduct.save()
+        return updatedProduct
+
     }
 
     async deleteById(id) {
@@ -23,7 +42,7 @@ class ProductService {
         const offset = getOffset(limit, page)
         const { brandIds, countryIds } = parseFilters(brandId, countryId)
 
-        order = order? [orderList.find(item => item.id === +order).value] : orderList[0].value
+        order = order ? [orderList.find(item => item.id === +order).value] : orderList[0].value
         const parameters =
         {
             where: { categoryId },

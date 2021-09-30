@@ -5,10 +5,13 @@ const ApiError = require('../error/apiError')
 const ProductService = require('../services/productService')
 
 class ProductController {
+
     async create(req, res, next) {
+        console.log(req.files)
         try {
             let { name, price, brandId, countryId, categoryId, info } = req.body
-            const { img } = req.files
+            const { file } = req.files
+
 
             const product = await ProductService.create(
                 {
@@ -17,7 +20,7 @@ class ProductController {
                     brandId,
                     countryId,
                     categoryId,
-                    img
+                    file
                 }
             )
             if (info) {
@@ -32,6 +35,25 @@ class ProductController {
             }
             return res.json(product)
         } catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+
+    }
+
+    async update(req, res, next) {
+        try {
+            let file = null;
+            let { id, name, price, categoryId, brandId, countryId, info } = req.body
+
+            if (req.files) {
+                file = req.files.file
+            }
+            const product = await ProductService.update(
+                { id, name, price, categoryId, brandId, countryId, info, file }
+            )
+            return res.json(product)
+        } catch (e) {
+            // console.log(e)
             next(ApiError.badRequest(e.message))
         }
 
@@ -52,7 +74,7 @@ class ProductController {
     }
     async getAll(req, res, next) {
         try {
-            const { brandId, countryId, limit, page , order, group} = req.query;
+            const { brandId, countryId, limit, page, order, group } = req.query;
             const { categoryId } = req.params
 
             if (!Number.isInteger(parseInt(categoryId))) {
@@ -65,7 +87,7 @@ class ProductController {
 
             return res.json(products)
         } catch (e) {
-            
+
             console.log(e)
             return next(ApiError.badRequest('Непредвиденная ошибка'))
         }
@@ -83,7 +105,7 @@ class ProductController {
         }
     }
 
-    
+
 }
 
 module.exports = new ProductController()
