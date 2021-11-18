@@ -9,7 +9,7 @@ class ProductService {
     async create(product) {
         const { file } = product
         const fileName = FileService.saveFile(file)
-        const createdProduct = await Product.create({ ...product, img: fileName })
+        const createdProduct  = await Product.create({ ...product, img: fileName })
         return createdProduct
     }
 
@@ -34,6 +34,7 @@ class ProductService {
 
     async deleteById(id) {
         const deletedProduct = await Product.destroy({ where: { id } })
+        console.log(deletedProduct)
         return deletedProduct
     }
 
@@ -62,10 +63,7 @@ class ProductService {
             limit,
             offset,
         }
-
-
         const findedProducts = await Product.findAndCountAll(parameters)
-
         return findedProducts
     }
     async getOne(id) {
