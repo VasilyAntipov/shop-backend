@@ -75,8 +75,6 @@ class ProductController {
     async getAll(req, res, next) {
         try {
             const { brandId, countryId, limit, page, order, group } = req.query;
-            console.log(req.query)
-            console.log(req.query.order)
             const { categoryId } = req.params
 
             if (!Number.isInteger(parseInt(categoryId))) {
@@ -107,7 +105,15 @@ class ProductController {
         }
     }
 
-
+    async getTop(req, res, next) {
+        try {
+            const products = await ProductService.getTop()
+            return res.json(products)
+        } catch (e) {
+            console.log(e)
+            return next(ApiError.badRequest('Непредвиденная ошибка'))
+        }
+    }
 }
 
 module.exports = new ProductController()

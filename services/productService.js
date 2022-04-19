@@ -1,6 +1,6 @@
-const { Product, ProductInfo, Brand, Country } = require("../models/models")
+const { Product, ProductInfo, Brand, Country, Rating } = require("../models/models")
 const { parseFilters, getOffset } = require("../utils/productsUtils")
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const FileService = require("./fileService");
 const { orderList, groupList } = require('../constants/index')
 
@@ -9,7 +9,7 @@ class ProductService {
     async create(product) {
         const { file } = product
         const fileName = FileService.saveFile(file)
-        const createdProduct  = await Product.create({ ...product, img: fileName })
+        const createdProduct = await Product.create({ ...product, img: fileName })
         return createdProduct
     }
 
@@ -44,8 +44,10 @@ class ProductService {
         const { brandIds, countryIds } = parseFilters(brandId, countryId)
 
         order = order ? [orderList.find(item => item.id === +order).value] : orderList[0].value
+
         const parameters =
         {
+            
             where: { categoryId },
             include: [
                 {
@@ -58,14 +60,22 @@ class ProductService {
                     where: { id: { [Op.or]: countryIds } },
                     attributes: ['name']
                 },
+                {
+                    model: Rating,
+                    attributes: ['rate'],
+                    group: ['product.id']
+                }
             ],
-            order,
             limit,
             offset,
         }
+
         const findedProducts = await Product.findAndCountAll(parameters)
         return findedProducts
+
     }
+
+
     async getOne(id) {
         const findedProduct = await Product.findOne(
             {
@@ -74,13 +84,22 @@ class ProductService {
             })
         return findedProduct
     }
+
+    async getTop() {
+        const limit = 5
+        const parameters =
+        {
+            order: [['rating', 'DESC']],
+            limit,
+        }
+        const findedProducts = await Product.findAndCountAll(parameters)
+        return findedProducts
+    }
+
     async createInfo(productInfo) {
         const createdProductInfo = await ProductInfo.create(productInfo)
         return createdProductInfo
     }
-
-
-
 }
 
 module.exports = new ProductService()
