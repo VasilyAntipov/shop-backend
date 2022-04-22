@@ -9,5 +9,6 @@ router.get('/one/:id', productController.getOne)
 router.get('/top', productController.getTop)
 router.delete('/:id', productController.deleteById)
 router.put('/', productController.update)
+router.post('/rate', productController.addRating)
 
 module.exports = router

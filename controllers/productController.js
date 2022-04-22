@@ -59,6 +59,22 @@ class ProductController {
 
     }
 
+    async addRating(req, res, next) {
+        try {
+            let file = null;
+            let { id, rate } = req.body
+
+            const product = await ProductService.addRating(
+                { id, rate }
+            )
+            return res.json(product)
+        } catch (e) {
+            // console.log(e)
+            next(ApiError.badRequest(e.message))
+        }
+
+    }
+
     async deleteById(req, res, next) {
         try {
             const { id } = req.params

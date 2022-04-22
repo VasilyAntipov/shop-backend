@@ -32,6 +32,14 @@ class ProductService {
 
     }
 
+
+    async addRating(product) {
+        const { id, rate } = product
+        const createdRating = await Rating.create({ productId: id, rate })
+        return createdRating
+    }
+
+
     async deleteById(id) {
         const deletedProduct = await Product.destroy({ where: { id } })
         console.log(deletedProduct)
@@ -47,7 +55,7 @@ class ProductService {
 
         const parameters =
         {
-            
+
             where: { categoryId },
             include: [
                 {
@@ -62,16 +70,16 @@ class ProductService {
                 },
                 {
                     model: Rating,
-                    attributes: ['rate'],
-                    group: ['product.id']
+                    attributes: ['rate']
                 }
             ],
             limit,
             offset,
         }
 
-        const findedProducts = await Product.findAndCountAll(parameters)
-        return findedProducts
+        const rows = await Product.findAll(parameters)
+        const count = rows.length
+        return { count, rows }
 
     }
 
@@ -89,10 +97,24 @@ class ProductService {
         const limit = 5
         const parameters =
         {
-            order: [['rating', 'DESC']],
-            limit,
+            attributes: [
+                'product.*',
+                [Sequelize.fn('avg', Sequelize.col('ratings.rate')), 'avgRating'],
+                [Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'countRating'],
+            ],
+            include: [
+                {
+                    model: Rating,
+                    attributes: [],
+                },
+            ],
+            group: ['product.id'],
+            raw: true,
+            order: [[Sequelize.fn('AVG', Sequelize.col('ratings.rate')), 'DESC NULLS LAST'],[Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'DESC NULLS LAST']],
+            distinct: true,
+            // limit,
         }
-        const findedProducts = await Product.findAndCountAll(parameters)
+        const findedProducts = await Product.findAll(parameters)
         return findedProducts
     }
 
