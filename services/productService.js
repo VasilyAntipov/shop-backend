@@ -77,17 +77,19 @@ class ProductService {
                 'product.*',
                 [Sequelize.fn('avg', Sequelize.col('ratings.rate')), 'avgRating'],
                 [Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'countRating'],
+                [Sequelize.col('brand.name'), 'brandName'],
+                [Sequelize.col('country.name'), 'countryName'],
             ],
             include: [
                 {
                     model: Brand,
                     where: { id: { [Op.or]: brandIds } },
-                    attributes: ['id', 'name']
+                    attributes: []
                 },
                 {
                     model: Country,
                     where: { id: { [Op.or]: countryIds } },
-                    attributes: ['id', 'name']
+                    attributes: []
                 },
                 {
                     model: Rating,
