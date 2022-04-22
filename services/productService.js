@@ -35,8 +35,27 @@ class ProductService {
 
     async addRating(product) {
         const { id, rate } = product
-        const createdRating = await Rating.create({ productId: id, rate })
-        return createdRating
+        await Rating.create({ productId: id, rate })
+        const findedProduct = await Product.findOne(
+            {
+                attributes: [
+                    'product.*',
+                    [Sequelize.fn('avg', Sequelize.col('ratings.rate')), 'avgRating'],
+                    [Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'countRating'],
+                ],
+                where: { id },
+                include:
+                    [
+                        {
+                            model: Rating,
+                            duplicating: false,
+                            attributes: [],
+                        },
+                    ],
+                group: ['product.id'],
+                raw: true,
+            })
+        return findedProduct
     }
 
 
@@ -47,54 +66,11 @@ class ProductService {
     }
 
     async getAll(filters) {
-        let { categoryId, brandId, countryId, limit = 5, page = 1, order, group } = filters
+        let { categoryId, brandId, countryId, limit = 5, page = 1, order } = filters
         const offset = getOffset(limit, page)
         const { brandIds, countryIds } = parseFilters(brandId, countryId)
-
         order = order ? [orderList.find(item => item.id === +order).value] : orderList[0].value
 
-        const parameters =
-        {
-
-            where: { categoryId },
-            include: [
-                {
-                    model: Brand,
-                    where: { id: { [Op.or]: brandIds } },
-                    attributes: ['name']
-                },
-                {
-                    model: Country,
-                    where: { id: { [Op.or]: countryIds } },
-                    attributes: ['name']
-                },
-                {
-                    model: Rating,
-                    attributes: ['rate']
-                }
-            ],
-            limit,
-            offset,
-        }
-
-        const rows = await Product.findAll(parameters)
-        const count = rows.length
-        return { count, rows }
-
-    }
-
-
-    async getOne(id) {
-        const findedProduct = await Product.findOne(
-            {
-                where: { id },
-                include: [{ model: ProductInfo, as: 'info' }]
-            })
-        return findedProduct
-    }
-
-    async getTop() {
-        const limit = 5
         const parameters =
         {
             attributes: [
@@ -104,18 +80,74 @@ class ProductService {
             ],
             include: [
                 {
+                    model: Brand,
+                    where: { id: { [Op.or]: brandIds } },
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: Country,
+                    where: { id: { [Op.or]: countryIds } },
+                    attributes: ['id', 'name']
+                },
+                {
                     model: Rating,
+                    duplicating: false,
                     attributes: [],
                 },
             ],
-            group: ['product.id'],
+            where: { categoryId },
+            group: ['product.id', 'brand.id', 'country.id'],
+            order,
+            limit,
+            offset,
             raw: true,
-            order: [[Sequelize.fn('AVG', Sequelize.col('ratings.rate')), 'DESC NULLS LAST'],[Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'DESC NULLS LAST']],
-            distinct: true,
-            // limit,
+        }
+        const findedProducts = await Product.findAll(parameters)
+        const count = findedProducts.length
+        return { count, rows: findedProducts }
+    }
+
+
+    async getTop() {
+        const limit = 15 // лимит на показ товаров в слайдере
+        const parameters =
+        {
+            attributes: [
+                'product.*',
+                [Sequelize.fn('avg', Sequelize.col('ratings.rate')), 'avgRating'],
+                [Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'countRating'],
+            ],
+            include: [
+                {
+                    model: Brand,
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: Country,
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: Rating,
+                    attributes: [],
+                    duplicating: false,
+                },
+            ],
+            limit,
+            order: [[Sequelize.fn('AVG', Sequelize.col('ratings.rate')), 'DESC NULLS LAST'], [Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'DESC NULLS LAST']],
+            group: ['product.id', 'brand.id', 'country.id'],
+            raw: true,
         }
         const findedProducts = await Product.findAll(parameters)
         return findedProducts
+    }
+
+    async getOne(id) {
+        const findedProduct = await Product.findOne(
+            {
+                where: { id },
+                include: [{ model: ProductInfo, as: 'info' }]
+            })
+        return findedProduct
     }
 
     async createInfo(productInfo) {
