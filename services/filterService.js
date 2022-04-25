@@ -1,6 +1,7 @@
 const { Product, Brand, Country } = require("../models/models")
 const { Op, fn, col } = require("sequelize");
-const { orderList, groupList } = require('../constants/index')
+const { groupList } = require('../constants/index')
+const {orderList} = require('../constants/index')
 
 class FilterService {
 

@@ -2,7 +2,7 @@ const { Product, ProductInfo, Brand, Country, Rating } = require("../models/mode
 const { parseFilters, getOffset } = require("../utils/productsUtils")
 const { Op, Sequelize } = require("sequelize");
 const FileService = require("./fileService");
-const { orderList, groupList } = require('../constants/index')
+const { getOrder, groupList } = require('../constants/index')
 
 class ProductService {
 
@@ -66,11 +66,11 @@ class ProductService {
     }
 
     async getAll(filters) {
-        let { categoryId, brandId, countryId, limit = 5, page = 1, order } = filters
+        let { categoryId, brandId, countryId, limit = 5, page = 1, orderIndex = 0 } = filters
         const offset = getOffset(limit, page)
         const { brandIds, countryIds } = parseFilters(brandId, countryId)
-        order = order ? [orderList.find(item => item.id === +order).value] : orderList[0].value
-
+        const order = getOrder(orderIndex)
+        console.log(order)
         const parameters =
         {
             attributes: [

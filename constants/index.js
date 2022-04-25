@@ -3,24 +3,33 @@ const DEFAULT_PAGE = 1.
 const { Sequelize } = require("sequelize");
 
 const orderList = [
-    { id: 1, value: ['price'], title: 'сначала недорогие' },
-    { id: 2, value: ['price', 'DESC'], title: 'сначала дорогие' },
-    { id: 3, value: ['name'], title: 'по наименованию' },
-    {
-        id: 4,
-        value: [[Sequelize.fn('AVG', Sequelize.col('ratings.rate')), 'DESC NULLS LAST'], [Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'DESC NULLS LAST']],
-        title: 'по оценке'
-    }
+    { id: 0, title: 'сначала недорогие' },
+    { id: 1, title: 'сначала дорогие' },
+    { id: 2, title: 'по наименованию' },
+    { id: 3, title: 'по оценке' }
 ]
+
+const getOrder = (id) => {
+    const orderValues = [
+        ['price'],
+        [['price', 'DESC']],
+        ['name'],
+        [[Sequelize.fn('AVG', Sequelize.col('ratings.rate')), 'DESC NULLS LAST'], [Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'DESC NULLS LAST']]
+    ]
+    return orderValues[id]
+}
+
 const groupList = [
-    { id: 1, value: '', title: "отсутствует" },
-    { id: 2, value: 'brandId', title: 'по производителю' },
-    { id: 3, value: 'countryId', title: 'по стране производства' }
+    { id: 0, value: '', title: "отсутствует" },
+    { id: 1, value: 'brandId', title: 'по производителю' },
+    { id: 2, value: 'countryId', title: 'по стране производства' }
 ]
 
 
 module.exports = {
     DEFAULT_LIMIT,
     DEFAULT_PAGE,
-    orderList, groupList
+    getOrder,
+    orderList,
+    groupList
 }
