@@ -93,13 +93,11 @@ class ProductController {
             const { brandId, countryId, limit, page, orderIndex, group } = req.query;
             const { categoryId } = req.params
 
+
             if (!Number.isInteger(parseInt(categoryId))) {
                 return next(ApiError.badRequest('Неверный id каталога'))
             }
-
-
-            const products = await ProductService
-                .getAll({ brandId, countryId, limit, page, categoryId, orderIndex, group })
+            const products = await ProductService.getAll({ brandId, countryId, limit, page, orderIndex, group, categoryId })
 
             return res.json(products)
         } catch (e) {
@@ -115,9 +113,12 @@ class ProductController {
                 return next(ApiError.badRequest('Неверный id'))
             }
             const product = await ProductService.getOne(id)
+            console.log(product)
             return res.json(product)
         } catch (e) {
+            console.log(e)
             return next(ApiError.badRequest('Непредвиденная ошибка'))
+           
         }
     }
 
@@ -126,7 +127,6 @@ class ProductController {
             const products = await ProductService.getTop()
             return res.json(products)
         } catch (e) {
-            console.log(e)
             return next(ApiError.badRequest('Непредвиденная ошибка'))
         }
     }

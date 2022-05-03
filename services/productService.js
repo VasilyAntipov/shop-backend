@@ -66,11 +66,10 @@ class ProductService {
     }
 
     async getAll(filters) {
-        let { categoryId, brandId, countryId, limit = 5, page = 1, orderIndex = 0 } = filters
+        let { brandId, countryId, limit = 5, page = 1, orderIndex = 0, categoryId } = filters
         const offset = getOffset(limit, page)
         const { brandIds, countryIds } = parseFilters(brandId, countryId)
         const order = getOrder(orderIndex)
-        console.log(order)
         const parameters =
         {
             attributes: [
@@ -144,12 +143,38 @@ class ProductService {
     }
 
     async getOne(id) {
-        const findedProduct = await Product.findOne(
-            {
-                where: { id },
-                include: [{ model: ProductInfo, as: 'info' }]
-            })
-        return findedProduct
+
+        const parameters =
+        {
+            attributes: [
+                'product.*',
+                [Sequelize.fn('avg', Sequelize.col('ratings.rate')), 'avgRating'],
+                [Sequelize.fn('COUNT', Sequelize.col('ratings.id')), 'countRating'],
+                [Sequelize.col('brand.name'), 'brandName'],
+                [Sequelize.col('country.name'), 'countryName'],
+            ],
+            include: [
+                {
+                    model: Brand,
+                    attributes: []
+                },
+                {
+                    model: Country,
+                    attributes: []
+                },
+                {
+                    model: Rating,
+                    duplicating: false,
+                    attributes: [],
+                },
+            ],
+            where: { id },
+            group: ['product.id', 'brand.id', 'country.id'],
+            raw: true,
+        }
+        const findedProducts = await Product.findAll(parameters)
+        const count = findedProducts.length
+        return { count, rows: findedProducts }
     }
 
     async createInfo(productInfo) {
